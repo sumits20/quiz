@@ -444,14 +444,8 @@
    ********************/
   // rounds will be loaded from rounds.json
   let rounds = [];
-
-  const players = [
-    { id: 0, name: "Sahashra", score: 0 },
-    { id: 1, name: "Nandu", score: 0 },
-    { id: 2, name: "Jayadev", score: 0 },
-    { id: 3, name: "Rio", score: 0 }
-  ];
-
+  let players = [];   // will be loaded from players.json
+  
   /********************
    * STATE
    ********************/
@@ -784,6 +778,14 @@
     try {
       const res = await fetch('rounds.json');
       rounds = await res.json();
+
+      const pres = await fetch('players.json');
+      const pjson = await pres.json();
+      players = pjson.map((p, index) => ({
+        id: index,
+        name: p.name,
+        score: 0
+      }));
       // Shuffle the rounds randomly
       rounds = rounds.sort(() => Math.random() - 0.5);
 
@@ -841,6 +843,7 @@
   
 </body>
 </html>
+
 
 
 
