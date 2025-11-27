@@ -437,294 +437,308 @@
     </div>
   </div>
 
-  <script>
-    /********************
-     * GAME CONFIG
-     ********************/
-    // Add your own images + answers here
-    // answer is compared case-insensitive and trimmed
-    const rounds = [
-      {
-        src: "https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg",
-        answer: "cat"
-      },
-      {
-        src: "https://images.pexels.com/photos/56888/tower-eiffel-tower-paris-france-56888.jpeg",
-        answer: "eiffel tower"
-      },
-      {
-        src: "https://images.pexels.com/photos/60597/daisy-beautiful-flower-white-60597.jpeg",
-        answer: "flower"
+<script>
+  /********************
+   * GAME CONFIG
+   ********************/
+  // rounds will be loaded from rounds.json
+  let rounds = [];
+
+  const players = [
+    { id: 0, name: "Sahashrya", score: 0 },
+    { id: 1, name: "Nandu", score: 0 },
+    { id: 2, name: "Jayadev", score: 0 },
+    { id: 3, name: "Rio", score: 0 }
+  ];
+
+  /********************
+   * STATE
+   ********************/
+  let currentPlayerIndex = 0;
+  let currentRoundIndex = 0;
+  let roundActive = true;
+
+  const coverTiles = [];
+  const TOTAL_TILES = 16;
+
+  /********************
+   * DOM ELEMENTS
+   ********************/
+  const quizImageEl = document.getElementById("quizImage");
+  const coverGridEl = document.getElementById("coverGrid");
+  const currentPlayerLabelEl = document.getElementById("currentPlayerLabel");
+  const blocksLeftEl = document.getElementById("blocksLeft");
+  const feedbackEl = document.getElementById("feedback");
+  const roundNumberEl = document.getElementById("roundNumber");
+  const roundStatusEl = document.getElementById("roundStatus");
+  const scoresGridEl = document.getElementById("scoresGrid");
+  const winnerLabelEl = document.getElementById("winnerLabel");
+
+  const revealBtn = document.getElementById("revealBtn");
+  const guessBtn = document.getElementById("guessBtn");
+  const guessInput = document.getElementById("guessInput");
+  const nextRoundBtn = document.getElementById("nextRoundBtn");
+
+  /********************
+   * INITIAL SETUP
+   ********************/
+  function createCoverTiles() {
+    coverGridEl.innerHTML = "";
+    coverTiles.length = 0;
+
+    for (let i = 0; i < TOTAL_TILES; i++) {
+      const tile = document.createElement("div");
+      tile.classList.add("cover-tile");
+      tile.dataset.index = i;
+      coverGridEl.appendChild(tile);
+      coverTiles.push(tile);
+    }
+    updateBlocksLeft();
+  }
+
+  function checkAllTilesRevealed() {
+    const remaining = coverTiles.filter(t => !t.classList.contains("removed")).length;
+
+    if (remaining === 0 && roundActive) {
+      // Nobody guessed correctly
+      roundActive = false;
+
+      feedbackEl.textContent = "All blocks revealed! No one guessed correctly.";
+      feedbackEl.className = "feedback err";
+
+      roundStatusEl.textContent = "Round over — no points awarded.";
+
+      revealBtn.disabled = true;
+      guessBtn.disabled = true;
+      nextRoundBtn.disabled = false;
+
+      return true;
+    }
+    return false;
+  }
+
+  function updateBlocksLeft() {
+    const remaining = coverTiles.filter(t => !t.classList.contains("removed")).length;
+    blocksLeftEl.textContent = remaining;
+    if (remaining === 0) revealBtn.disabled = true;
+  }
+
+  function updateCurrentPlayerLabel() {
+    const player = players[currentPlayerIndex];
+    currentPlayerLabelEl.textContent = `${player.name}'s turn`;
+  }
+
+  function updateScoresUI() {
+    scoresGridEl.innerHTML = "";
+    const highestScore = Math.max(...players.map(p => p.score));
+
+    players.forEach((player, index) => {
+      const card = document.createElement("div");
+      card.className = "player-card";
+      if (index === currentPlayerIndex && roundActive) {
+        card.classList.add("active");
       }
-      // add more {src, answer} objects here
-    ];
 
-    const players = [
-      { id: 0, name: "Sahashrya", score: 0 },
-      { id: 1, name: "Nandu", score: 0 },
-      { id: 2, name: "Jayadev", score: 0 },
-      { id: 3, name: "Rio", score: 0 }
-    ];
+      const nameRow = document.createElement("div");
+      nameRow.className = "player-name";
+      const nameSpan = document.createElement("span");
+      nameSpan.textContent = player.name;
+      const tagSpan = document.createElement("span");
+      tagSpan.className = "player-tag";
+      tagSpan.textContent = player.score === highestScore && highestScore > 0 ? "Leader" : "Challenger";
 
-    /********************
-     * STATE
-     ********************/
-    let currentPlayerIndex = 0;
-    let currentRoundIndex = 0;
-    let roundActive = true;
+      nameRow.appendChild(nameSpan);
+      nameRow.appendChild(tagSpan);
 
-    const coverTiles = [];
-    const TOTAL_TILES = 16;
+      const scoreRow = document.createElement("div");
+      scoreRow.className = "player-score";
+      scoreRow.textContent = `${player.score} pts`;
 
-    /********************
-     * DOM ELEMENTS
-     ********************/
-    const quizImageEl = document.getElementById("quizImage");
-    const coverGridEl = document.getElementById("coverGrid");
-    const currentPlayerLabelEl = document.getElementById("currentPlayerLabel");
-    const blocksLeftEl = document.getElementById("blocksLeft");
-    const feedbackEl = document.getElementById("feedback");
-    const roundNumberEl = document.getElementById("roundNumber");
-    const roundStatusEl = document.getElementById("roundStatus");
-    const scoresGridEl = document.getElementById("scoresGrid");
-    const winnerLabelEl = document.getElementById("winnerLabel");
+      const indicator = document.createElement("div");
+      indicator.className = "player-turn-indicator";
 
-    const revealBtn = document.getElementById("revealBtn");
-    const guessBtn = document.getElementById("guessBtn");
-    const guessInput = document.getElementById("guessInput");
-    const nextRoundBtn = document.getElementById("nextRoundBtn");
+      card.appendChild(nameRow);
+      card.appendChild(scoreRow);
+      card.appendChild(indicator);
+      scoresGridEl.appendChild(card);
+    });
+  }
 
-    /********************
-     * INITIAL SETUP
-     ********************/
-    function createCoverTiles() {
-      coverGridEl.innerHTML = "";
-      coverTiles.length = 0;
+  function loadRound(index) {
+    const round = rounds[index];
+    quizImageEl.src = round.src;
+    roundNumberEl.textContent = index + 1;
+    roundStatusEl.textContent = "Guess the hidden picture!";
+    feedbackEl.textContent = "";
+    feedbackEl.className = "feedback";
+    winnerLabelEl.textContent = "";
+    roundActive = true;
 
-      for (let i = 0; i < TOTAL_TILES; i++) {
-        const tile = document.createElement("div");
-        tile.classList.add("cover-tile");
-        tile.dataset.index = i;
-        coverGridEl.appendChild(tile);
-        coverTiles.push(tile);
-      }
+    // reset tiles
+    createCoverTiles();
+
+    // buttons
+    revealBtn.disabled = false;
+    guessBtn.disabled = false;
+    nextRoundBtn.disabled = true;
+
+    // reset turn to Player 1 for every new round
+    currentPlayerIndex = 0;
+    updateCurrentPlayerLabel();
+    updateScoresUI();
+    guessInput.value = "";
+    guessInput.focus();
+  }
+
+  function revealRandomTile() {
+    if (!roundActive) return;
+
+    const remaining = coverTiles.filter(t => !t.classList.contains("removed"));
+    if (remaining.length === 0) {
       updateBlocksLeft();
-    }
-    function checkAllTilesRevealed() {
-      const remaining = coverTiles.filter(t => !t.classList.contains("removed")).length;
-    
-      if (remaining === 0 && roundActive) {
-        // Nobody guessed correctly
-        roundActive = false;
-    
-        feedbackEl.textContent = "All blocks revealed! No one guessed correctly.";
-        feedbackEl.className = "feedback err";
-    
-        roundStatusEl.textContent = "Round over — no points awarded.";
-    
-        revealBtn.disabled = true;
-        guessBtn.disabled = true;
-        nextRoundBtn.disabled = false;
-    
-        return true;
-      }
-      return false;
-    }
-    function updateBlocksLeft() {
-      const remaining = coverTiles.filter(t => !t.classList.contains("removed")).length;
-      blocksLeftEl.textContent = remaining;
-      if (remaining === 0) revealBtn.disabled = true;
+      checkAllTilesRevealed();
+      return;
     }
 
-    function updateCurrentPlayerLabel() {
+    const randomIndex = Math.floor(Math.random() * remaining.length);
+    const tile = remaining[randomIndex];
+    tile.classList.add("removed");
+    updateBlocksLeft();
+    // After revealing a tile, check if round should end
+    checkAllTilesRevealed();
+  }
+
+  function normalize(str) {
+    return str.trim().toLowerCase();
+  }
+
+  function handleGuess() {
+    if (!roundActive) return;
+
+    const input = guessInput.value;
+    if (!input.trim()) {
+      feedbackEl.textContent = "Type something to guess!";
+      feedbackEl.className = "feedback err";
+      return;
+    }
+
+    const round = rounds[currentRoundIndex];
+    const correct = normalize(input) === normalize(round.answer);
+
+    if (correct) {
+      roundActive = false;
       const player = players[currentPlayerIndex];
-      currentPlayerLabelEl.textContent = `${player.name}'s turn`;
-    }
+      player.score += 1;
 
-    function updateScoresUI() {
-      scoresGridEl.innerHTML = "";
-      const highestScore = Math.max(...players.map(p => p.score));
+      // reveal everything
+      coverTiles.forEach(tile => tile.classList.add("removed"));
+      updateBlocksLeft();
 
-      players.forEach((player, index) => {
-        const card = document.createElement("div");
-        card.className = "player-card";
-        if (index === currentPlayerIndex && roundActive) {
-          card.classList.add("active");
+      feedbackEl.textContent = `${player.name} is correct! The answer was "${round.answer}".`;
+      feedbackEl.className = "feedback ok";
+
+      roundStatusEl.textContent = `${player.name} wins this round!`;
+      updateScoresUI();
+      revealBtn.disabled = true;
+      guessBtn.disabled = true;
+
+      if (currentRoundIndex < rounds.length - 1) {
+        nextRoundBtn.disabled = false;
+        winnerLabelEl.textContent = "Click Next Round to continue.";
+      } else {
+        // game finished
+        const topScore = Math.max(...players.map(p => p.score));
+        const winners = players.filter(p => p.score === topScore);
+        if (winners.length === 1) {
+          winnerLabelEl.textContent = `🏆 Overall winner: ${winners[0].name} (${winners[0].score} pts)`;
+        } else {
+          const names = winners.map(w => w.name).join(", ");
+          winnerLabelEl.textContent = `🏆 Tie between: ${names} (${topScore} pts)`;
         }
+        roundStatusEl.textContent = "Game over!";
+      }
+    } else {
+      feedbackEl.textContent = `Incorrect! ${players[currentPlayerIndex].name} loses their turn.`;
+      feedbackEl.className = "feedback err";
 
-        const nameRow = document.createElement("div");
-        nameRow.className = "player-name";
-        const nameSpan = document.createElement("span");
-        nameSpan.textContent = player.name;
-        const tagSpan = document.createElement("span");
-        tagSpan.className = "player-tag";
-        tagSpan.textContent = player.score === highestScore && highestScore > 0 ? "Leader" : "Challenger";
+      // Reveal 1 block on wrong answer
+      revealRandomTile();
 
-        nameRow.appendChild(nameSpan);
-        nameRow.appendChild(tagSpan);
-
-        const scoreRow = document.createElement("div");
-        scoreRow.className = "player-score";
-        scoreRow.textContent = `${player.score} pts`;
-
-        const indicator = document.createElement("div");
-        indicator.className = "player-turn-indicator";
-
-        card.appendChild(nameRow);
-        card.appendChild(scoreRow);
-        card.appendChild(indicator);
-        scoresGridEl.appendChild(card);
-      });
-    }
-
-    function loadRound(index) {
-      const round = rounds[index];
-      quizImageEl.src = round.src;
-      roundNumberEl.textContent = index + 1;
-      roundStatusEl.textContent = "Guess the hidden picture!";
-      feedbackEl.textContent = "";
-      feedbackEl.className = "feedback";
-      winnerLabelEl.textContent = "";
-      roundActive = true;
-
-      // reset tiles
-      createCoverTiles();
-
-      // buttons
-      revealBtn.disabled = false;
-      guessBtn.disabled = false;
-      nextRoundBtn.disabled = true;
-
-      // reset turn to Player 1 for every new round
-      currentPlayerIndex = 0;
+      // next player's turn
+      currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
       updateCurrentPlayerLabel();
       updateScoresUI();
-      guessInput.value = "";
-      guessInput.focus();
     }
 
-    function revealRandomTile() {
-      if (!roundActive) return;
+    guessInput.value = "";
+    guessInput.focus();
+  }
 
-      const remaining = coverTiles.filter(t => !t.classList.contains("removed"));
-      if (remaining.length === 0) {
-        updateBlocksLeft();
-        checkAllTilesRevealed();
-        return;
-      }
-
-      const randomIndex = Math.floor(Math.random() * remaining.length);
-      const tile = remaining[randomIndex];
-      tile.classList.add("removed");
-      updateBlocksLeft();
-      // After revealing a tile, check if round should end
-      checkAllTilesRevealed();
+  function goToNextRound() {
+    if (currentRoundIndex < rounds.length - 1) {
+      currentRoundIndex++;
+      loadRound(currentRoundIndex);
     }
+  }
 
-    function normalize(str) {
-      return str.trim().toLowerCase();
-    }
+  /********************
+   * LOAD ROUNDS.JSON
+   ********************/
+  async function initGame() {
+    try {
+      const res = await fetch('rounds.json');
+      rounds = await res.json();
 
-    function handleGuess() {
-      if (!roundActive) return;
-
-      const input = guessInput.value;
-      if (!input.trim()) {
-        feedbackEl.textContent = "Type something to guess!";
-        feedbackEl.className = "feedback err";
-        return;
-      }
-
-      const round = rounds[currentRoundIndex];
-      const correct = normalize(input) === normalize(round.answer);
-
-      if (correct) {
-        roundActive = false;
-        const player = players[currentPlayerIndex];
-        player.score += 1;
-
-        // reveal everything
-        coverTiles.forEach(tile => tile.classList.add("removed"));
-        updateBlocksLeft();
-
-        feedbackEl.textContent = `${player.name} is correct! The answer was "${round.answer}".`;
-        feedbackEl.className = "feedback ok";
-
-        roundStatusEl.textContent = `${player.name} wins this round!`;
-        updateScoresUI();
+      if (!Array.isArray(rounds) || rounds.length === 0) {
+        console.error('No rounds found in rounds.json');
+        roundStatusEl.textContent = "No rounds configured. Check rounds.json.";
         revealBtn.disabled = true;
         guessBtn.disabled = true;
-
-        if (currentRoundIndex < rounds.length - 1) {
-          nextRoundBtn.disabled = false;
-          winnerLabelEl.textContent = "Click Next Round to continue.";
-        } else {
-          // game finished
-          const topScore = Math.max(...players.map(p => p.score));
-          const winners = players.filter(p => p.score === topScore);
-          if (winners.length === 1) {
-            winnerLabelEl.textContent = `🏆 Overall winner: ${winners[0].name} (${winners[0].score} pts)`;
-          } else {
-            const names = winners.map(w => w.name).join(", ");
-            winnerLabelEl.textContent = `🏆 Tie between: ${names} (${topScore} pts)`;
-          }
-          roundStatusEl.textContent = "Game over!";
-        }
-      } else {
-        feedbackEl.textContent = `Incorrect! ${players[currentPlayerIndex].name} loses their turn.`;
-        feedbackEl.className = "feedback err";
-
-        // Reveal 1 block on wrong answer
-        revealRandomTile();
-        
-        // next player's turn
-        currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-        updateCurrentPlayerLabel();
-        updateScoresUI();
+        return;
       }
 
-      guessInput.value = "";
-      guessInput.focus();
-    }
-
-    function goToNextRound() {
-      if (currentRoundIndex < rounds.length - 1) {
-        currentRoundIndex++;
-        loadRound(currentRoundIndex);
-      }
-    }
-
-    /********************
-     * EVENT LISTENERS
-     ********************/
-    revealBtn.addEventListener("click", () => {
-      revealRandomTile();
-      guessInput.focus();
-    });
-
-    guessBtn.addEventListener("click", () => {
-      handleGuess();
-    });
-
-    guessInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        handleGuess();
-      }
-    });
-
-    nextRoundBtn.addEventListener("click", () => {
-      goToNextRound();
-    });
-
-    /********************
-     * START GAME
-     ********************/
-    window.addEventListener("load", () => {
       loadRound(currentRoundIndex);
-    });
-  </script>
+    } catch (err) {
+      console.error('Error loading rounds.json', err);
+      roundStatusEl.textContent = "Failed to load rounds.json.";
+      revealBtn.disabled = true;
+      guessBtn.disabled = true;
+    }
+  }
+
+  /********************
+   * EVENT LISTENERS
+   ********************/
+  revealBtn.addEventListener("click", () => {
+    revealRandomTile();
+    guessInput.focus();
+  });
+
+  guessBtn.addEventListener("click", () => {
+    handleGuess();
+  });
+
+  guessInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      handleGuess();
+    }
+  });
+
+  nextRoundBtn.addEventListener("click", () => {
+    goToNextRound();
+  });
+
+  /********************
+   * START GAME
+   ********************/
+  window.addEventListener("load", () => {
+    initGame();
+  });
+</script>
+  
 </body>
 </html>
+
 
 
 
