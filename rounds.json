@@ -37,7 +37,7 @@
   { "src": "images/snail.jpg", "answer": "snail" },
   { "src": "images/taj_mahal.jpg", "answer": "taj mahal" },
   { "src": "images/turtle.jpg", "answer": "turtle" },
-  { "src": "images/zebra.jpg", "answer": "zebra" }
+  { "src": "images/zebra.jpg", "answer": "zebra" },
   { "src": "images/penguin.jpg", "answer": "penguin" },
   { "src": "images/dolphin.jpg", "answer": "dolphin" },
   { "src": "images/whale.jpg", "answer": "whale" },
@@ -57,6 +57,7 @@
   { "src": "images/chameleon.jpg", "answer": "chameleon | lizard" },
   { "src": "images/rhino.jpg", "answer": "rhino | rhinoceros" }
 ]
+
 
 
 
