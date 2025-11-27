@@ -44,7 +44,7 @@
   { "src": "images/crab.jpg", "answer": "crab" },
   { "src": "images/grasshopper.jpg", "answer": "grasshopper | locust" },
   { "src": "images/ladybug.jpg", "answer": "ladybug | ladybird" },
-  { "src": "images/caterpillar.jpg", "answer": "caterpillar" }
+  { "src": "images/caterpillar.jpg", "answer": "caterpillar" },
   { "src": "images/gorilla.jpg", "answer": "gorilla" },
   { "src": "images/moose.jpg", "answer": "moose | elk" },
   { "src": "images/otter.jpg", "answer": "otter" },
@@ -57,6 +57,7 @@
   { "src": "images/chameleon.jpg", "answer": "chameleon | lizard" },
   { "src": "images/rhino.jpg", "answer": "rhino | rhinoceros" }
 ]
+
 
 
 
