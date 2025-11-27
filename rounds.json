@@ -1,0 +1,14 @@
+[
+  {
+    "src": "images/cat.jpg",
+    "answer": "cat"
+  },
+  {
+    "src": "images/eiffel.jpg",
+    "answer": "eiffel tower"
+  },
+  {
+    "src": "images/dog.jpg",
+    "answer": "dog"
+  }
+]
