@@ -461,6 +461,10 @@
   const coverTiles = [];
   const TOTAL_TILES = 16;
 
+  // FINAL CHANCE PHASE
+  let finalGuessPhase = false;   // true when all tiles are revealed and last-chance mode starts
+  let finalGuessesLeft = 0;      // how many final guesses remain in this round
+
   /********************
    * DOM ELEMENTS
    ********************/
@@ -496,31 +500,35 @@
     updateBlocksLeft();
   }
 
-  function checkAllTilesRevealed() {
-    const remaining = coverTiles.filter(t => !t.classList.contains("removed")).length;
-
-    if (remaining === 0 && roundActive) {
-      // Nobody guessed correctly
-      roundActive = false;
-
-      feedbackEl.textContent = "All blocks revealed! No one guessed correctly.";
-      feedbackEl.className = "feedback err";
-
-      roundStatusEl.textContent = "Round over — no points awarded.";
-
-      revealBtn.disabled = true;
-      guessBtn.disabled = true;
-      nextRoundBtn.disabled = false;
-
-      return true;
-    }
-    return false;
-  }
-
   function updateBlocksLeft() {
     const remaining = coverTiles.filter(t => !t.classList.contains("removed")).length;
     blocksLeftEl.textContent = remaining;
-    if (remaining === 0) revealBtn.disabled = true;
+    if (remaining === 0) {
+      revealBtn.disabled = true;
+    }
+  }
+
+  // When all tiles are gone, start FINAL CHANCE phase (do not end round yet)
+  function checkAllTilesRevealed() {
+    const remaining = coverTiles.filter(t => !t.classList.contains("removed")).length;
+
+    // All tiles gone, round still active, and we are not yet in final phase
+    if (remaining === 0 && roundActive && !finalGuessPhase) {
+      finalGuessPhase = true;
+      finalGuessesLeft = players.length;
+
+      revealBtn.disabled = true;
+      roundStatusEl.textContent = "All blocks revealed! Final chance: each player gets one more guess.";
+
+      // Start final guesses from Player 1
+      currentPlayerIndex = 0;
+      updateCurrentPlayerLabel();
+      updateScoresUI();
+
+      return true;
+    }
+
+    return false;
   }
 
   function updateCurrentPlayerLabel() {
@@ -574,6 +582,10 @@
     winnerLabelEl.textContent = "";
     roundActive = true;
 
+    // reset final phase state
+    finalGuessPhase = false;
+    finalGuessesLeft = 0;
+
     // reset tiles
     createCoverTiles();
 
@@ -604,7 +616,8 @@
     const tile = remaining[randomIndex];
     tile.classList.add("removed");
     updateBlocksLeft();
-    // After revealing a tile, check if round should end
+
+    // After revealing a tile, check if all tiles are gone (might start final phase)
     checkAllTilesRevealed();
   }
 
@@ -626,6 +639,7 @@
     const correct = normalize(input) === normalize(round.answer);
 
     if (correct) {
+      // Same behaviour in normal or final phase: correct ends round and gives point
       roundActive = false;
       const player = players[currentPlayerIndex];
       player.score += 1;
@@ -658,16 +672,61 @@
         roundStatusEl.textContent = "Game over!";
       }
     } else {
-      feedbackEl.textContent = `Incorrect! ${players[currentPlayerIndex].name} loses their turn.`;
-      feedbackEl.className = "feedback err";
+      const currentName = players[currentPlayerIndex].name;
 
-      // Reveal 1 block on wrong answer
-      revealRandomTile();
+      if (!finalGuessPhase) {
+        // NORMAL PHASE: wrong answer
+        feedbackEl.textContent = `Incorrect! ${currentName} loses their turn.`;
+        feedbackEl.className = "feedback err";
 
-      // next player's turn
-      currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
-      updateCurrentPlayerLabel();
-      updateScoresUI();
+        // Reveal 1 block on wrong answer
+        revealRandomTile();
+
+        // next player's turn
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+        updateCurrentPlayerLabel();
+        updateScoresUI();
+      } else {
+        // FINAL CHANCE PHASE: all tiles revealed, each player gets one last guess
+        feedbackEl.textContent = `Incorrect! ${currentName}'s final guess is used.`;
+        feedbackEl.className = "feedback err";
+
+        finalGuessesLeft--;
+
+        if (finalGuessesLeft <= 0) {
+          // Everyone used their final guess → round ends with no points
+          roundActive = false;
+
+          feedbackEl.textContent = `No one guessed it. The answer was "${round.answer}".`;
+          roundStatusEl.textContent = "Round over — no points awarded.";
+
+          guessBtn.disabled = true;
+          revealBtn.disabled = true;
+
+          if (currentRoundIndex < rounds.length - 1) {
+            nextRoundBtn.disabled = false;
+            winnerLabelEl.textContent = "Click Next Round to continue.";
+          } else {
+            // Game end scenario
+            const topScore = Math.max(...players.map(p => p.score));
+            const winners = players.filter(p => p.score === topScore);
+
+            if (winners.length === 1) {
+              winnerLabelEl.textContent = `🏆 Overall winner: ${winners[0].name} (${winners[0].score} pts)`;
+            } else {
+              const names = winners.map(w => w.name).join(", ");
+              winnerLabelEl.textContent = `🏆 Tie between: ${names} (${topScore} pts)`;
+            }
+
+            roundStatusEl.textContent = "Game over!";
+          }
+        } else {
+          // Still more players get final guesses
+          currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+          updateCurrentPlayerLabel();
+          updateScoresUI();
+        }
+      }
     }
 
     guessInput.value = "";
@@ -735,9 +794,11 @@
     initGame();
   });
 </script>
+
   
 </body>
 </html>
+
 
 
 
