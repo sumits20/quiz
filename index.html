@@ -636,7 +636,10 @@
     }
 
     const round = rounds[currentRoundIndex];
-    const correct = normalize(input) === normalize(round.answer);
+    const correct = normalize(round.answer)
+                 .split('|')
+                 .map(a => a.trim().toLowerCase())
+                 .includes(normalize(input));
 
     if (correct) {
       // Same behaviour in normal or final phase: correct ends round and gives point
@@ -798,6 +801,7 @@
   
 </body>
 </html>
+
 
 
 
