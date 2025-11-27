@@ -750,6 +750,8 @@
     try {
       const res = await fetch('rounds.json');
       rounds = await res.json();
+      // Shuffle the rounds randomly
+      rounds = rounds.sort(() => Math.random() - 0.5);
 
       if (!Array.isArray(rounds) || rounds.length === 0) {
         console.error('No rounds found in rounds.json');
@@ -801,6 +803,7 @@
   
 </body>
 </html>
+
 
 
 
