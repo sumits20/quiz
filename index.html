@@ -1,10 +1,701 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>My Second Site</title>
+  <title>4 Player Picture Quiz</title>
+  <style>
+    :root {
+      --bg: #050816;
+      --card: #111827;
+      --accent: #3b82f6;
+      --accent-soft: rgba(59, 130, 246, 0.15);
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --radius-xl: 1.25rem;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1f2937 0, #020617 60%);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .game-container {
+      width: 100%;
+      max-width: 1000px;
+      background: linear-gradient(145deg, rgba(15,23,42,0.95), rgba(8,47,73,0.95));
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow:
+        0 20px 45px rgba(0,0,0,0.6),
+        0 0 0 1px rgba(148,163,184,0.1);
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 800px) {
+      .game-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .header {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 12px;
+    }
+
+    .title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title span {
+      font-size: 1rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.35);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 600;
+    }
+
+    .round-info {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .round-number {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* LEFT: board */
+
+    .board-card {
+      background: radial-gradient(circle at top, rgba(15,23,42,0.95), rgba(15,23,42,0.85));
+      border-radius: var(--radius-xl);
+      padding: 16px;
+      border: 1px solid rgba(148,163,184,0.25);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .current-player {
+      font-size: 0.95rem;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .current-player-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 6px rgba(59,130,246,0.25);
+    }
+
+    button {
+      border-radius: 999px;
+      border: none;
+      padding: 8px 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.15s ease, opacity 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      box-shadow: 0 10px 25px rgba(37,99,235,0.35);
+    }
+
+    .btn-secondary {
+      background: rgba(15,23,42,0.95);
+      color: var(--text-muted);
+      border: 1px solid rgba(148,163,184,0.4);
+    }
+
+    button:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 4px 12px rgba(15,23,42,0.6);
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .image-wrapper {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(148,163,184,0.4);
+      background: #020617;
+      min-height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #quizImage {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+      max-height: 400px;
+    }
+
+    .cover-grid {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      pointer-events: none;
+    }
+
+    .cover-tile {
+      position: relative;
+      pointer-events: auto;
+      background: radial-gradient(circle at top left, rgba(148,163,184,0.25), rgba(15,23,42, 0.95));
+      border: 1px solid rgba(30,64,175,0.35);
+      box-shadow: inset 0 0 20px rgba(15,23,42,0.8);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .cover-tile.removed {
+      opacity: 0;
+      transform: scale(0.98);
+      pointer-events: none;
+    }
+
+    .board-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .block-counter {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .block-pill {
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.4);
+    }
+
+    /* RIGHT: control + scores */
+
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .panel-card {
+      background: rgba(15,23,42,0.95);
+      border-radius: var(--radius-xl);
+      padding: 16px;
+      border: 1px solid rgba(148,163,184,0.35);
+    }
+
+    .panel-title {
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .guess-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: rgba(15,23,42,0.9);
+      color: var(--text-main);
+      outline: none;
+      font-size: 0.95rem;
+    }
+
+    input[type="text"]::placeholder {
+      color: #6b7280;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(37,99,235,0.8);
+    }
+
+    .feedback {
+      min-height: 22px;
+      font-size: 0.88rem;
+    }
+
+    .feedback.ok {
+      color: var(--success);
+    }
+
+    .feedback.err {
+      color: var(--danger);
+    }
+
+    .scores-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .player-card {
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: radial-gradient(circle at top, rgba(15,23,42,0.95), rgba(15,23,42,1));
+      border: 1px solid rgba(148,163,184,0.35);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.9rem;
+      position: relative;
+    }
+
+    .player-card.active {
+      border-color: rgba(59,130,246,0.9);
+      box-shadow: 0 0 0 1px rgba(59,130,246,0.6);
+    }
+
+    .player-name {
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .player-tag {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.4);
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+
+    .player-score {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .player-turn-indicator {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: transparent;
+    }
+
+    .player-card.active .player-turn-indicator {
+      background: var(--accent);
+      box-shadow: 0 0 0 5px rgba(59,130,246,0.3);
+    }
+
+    .bottom-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .spacer {
+      flex: 1;
+    }
+  </style>
 </head>
 <body>
-  <h1>Hello from my second GitHub Pages site!</h1>
+  <div class="game-container">
+    <div class="header">
+      <div class="title">
+        Picture Reveal Quiz
+        <span>4 Player • Local</span>
+      </div>
+      <div class="round-info">
+        Round <span class="round-number" id="roundNumber">1</span><br>
+        <span id="roundStatus">Guess the hidden picture!</span>
+      </div>
+    </div>
+
+    <!-- LEFT: Image board -->
+    <div class="board-card">
+      <div class="top-bar">
+        <div class="current-player">
+          <span class="current-player-dot"></span>
+          <span id="currentPlayerLabel">Player 1's turn</span>
+        </div>
+        <button id="revealBtn" class="btn-primary">
+          Reveal Block
+        </button>
+      </div>
+
+      <div class="image-wrapper">
+        <!-- Change the images in JS, not here -->
+        <img id="quizImage" src="" alt="Quiz Image">
+        <div id="coverGrid" class="cover-grid"></div>
+      </div>
+
+      <div class="board-footer">
+        <div class="block-counter">
+          Blocks remaining:
+          <span class="block-pill" id="blocksLeft">16</span>
+        </div>
+        <div>
+          Tip: Reveal a block, then make your guess!
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Guess + scores -->
+    <div class="side-panel">
+      <div class="panel-card">
+        <div class="panel-title">Make a Guess</div>
+        <div class="guess-row">
+          <input id="guessInput" type="text" placeholder="Type your guess here…" />
+          <button id="guessBtn" class="btn-secondary">Guess</button>
+        </div>
+        <div id="feedback" class="feedback"></div>
+      </div>
+
+      <div class="panel-card">
+        <div class="panel-title">Scores</div>
+        <div class="scores-grid" id="scoresGrid"></div>
+        <div class="bottom-controls">
+          <button id="nextRoundBtn" class="btn-secondary" disabled>Next Round</button>
+          <span class="spacer"></span>
+          <span id="winnerLabel"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /********************
+     * GAME CONFIG
+     ********************/
+    // Add your own images + answers here
+    // answer is compared case-insensitive and trimmed
+    const rounds = [
+      {
+        src: "https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg",
+        answer: "cat"
+      },
+      {
+        src: "https://images.pexels.com/photos/56888/tower-eiffel-tower-paris-france-56888.jpeg",
+        answer: "eiffel tower"
+      },
+      {
+        src: "https://images.pexels.com/photos/60597/daisy-beautiful-flower-white-60597.jpeg",
+        answer: "flower"
+      }
+      // add more {src, answer} objects here
+    ];
+
+    const players = [
+      { id: 0, name: "Player 1", score: 0 },
+      { id: 1, name: "Player 2", score: 0 },
+      { id: 2, name: "Player 3", score: 0 },
+      { id: 3, name: "Player 4", score: 0 }
+    ];
+
+    /********************
+     * STATE
+     ********************/
+    let currentPlayerIndex = 0;
+    let currentRoundIndex = 0;
+    let roundActive = true;
+
+    const coverTiles = [];
+    const TOTAL_TILES = 16;
+
+    /********************
+     * DOM ELEMENTS
+     ********************/
+    const quizImageEl = document.getElementById("quizImage");
+    const coverGridEl = document.getElementById("coverGrid");
+    const currentPlayerLabelEl = document.getElementById("currentPlayerLabel");
+    const blocksLeftEl = document.getElementById("blocksLeft");
+    const feedbackEl = document.getElementById("feedback");
+    const roundNumberEl = document.getElementById("roundNumber");
+    const roundStatusEl = document.getElementById("roundStatus");
+    const scoresGridEl = document.getElementById("scoresGrid");
+    const winnerLabelEl = document.getElementById("winnerLabel");
+
+    const revealBtn = document.getElementById("revealBtn");
+    const guessBtn = document.getElementById("guessBtn");
+    const guessInput = document.getElementById("guessInput");
+    const nextRoundBtn = document.getElementById("nextRoundBtn");
+
+    /********************
+     * INITIAL SETUP
+     ********************/
+    function createCoverTiles() {
+      coverGridEl.innerHTML = "";
+      coverTiles.length = 0;
+
+      for (let i = 0; i < TOTAL_TILES; i++) {
+        const tile = document.createElement("div");
+        tile.classList.add("cover-tile");
+        tile.dataset.index = i;
+        coverGridEl.appendChild(tile);
+        coverTiles.push(tile);
+      }
+      updateBlocksLeft();
+    }
+
+    function updateBlocksLeft() {
+      const remaining = coverTiles.filter(t => !t.classList.contains("removed")).length;
+      blocksLeftEl.textContent = remaining;
+      if (remaining === 0) revealBtn.disabled = true;
+    }
+
+    function updateCurrentPlayerLabel() {
+      const player = players[currentPlayerIndex];
+      currentPlayerLabelEl.textContent = `${player.name}'s turn`;
+    }
+
+    function updateScoresUI() {
+      scoresGridEl.innerHTML = "";
+      const highestScore = Math.max(...players.map(p => p.score));
+
+      players.forEach((player, index) => {
+        const card = document.createElement("div");
+        card.className = "player-card";
+        if (index === currentPlayerIndex && roundActive) {
+          card.classList.add("active");
+        }
+
+        const nameRow = document.createElement("div");
+        nameRow.className = "player-name";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = player.name;
+        const tagSpan = document.createElement("span");
+        tagSpan.className = "player-tag";
+        tagSpan.textContent = player.score === highestScore && highestScore > 0 ? "Leader" : "Challenger";
+
+        nameRow.appendChild(nameSpan);
+        nameRow.appendChild(tagSpan);
+
+        const scoreRow = document.createElement("div");
+        scoreRow.className = "player-score";
+        scoreRow.textContent = `${player.score} pts`;
+
+        const indicator = document.createElement("div");
+        indicator.className = "player-turn-indicator";
+
+        card.appendChild(nameRow);
+        card.appendChild(scoreRow);
+        card.appendChild(indicator);
+        scoresGridEl.appendChild(card);
+      });
+    }
+
+    function loadRound(index) {
+      const round = rounds[index];
+      quizImageEl.src = round.src;
+      roundNumberEl.textContent = index + 1;
+      roundStatusEl.textContent = "Guess the hidden picture!";
+      feedbackEl.textContent = "";
+      feedbackEl.className = "feedback";
+      winnerLabelEl.textContent = "";
+      roundActive = true;
+
+      // reset tiles
+      createCoverTiles();
+
+      // buttons
+      revealBtn.disabled = false;
+      guessBtn.disabled = false;
+      nextRoundBtn.disabled = true;
+
+      // reset turn to Player 1 for every new round
+      currentPlayerIndex = 0;
+      updateCurrentPlayerLabel();
+      updateScoresUI();
+      guessInput.value = "";
+      guessInput.focus();
+    }
+
+    function revealRandomTile() {
+      if (!roundActive) return;
+
+      const remaining = coverTiles.filter(t => !t.classList.contains("removed"));
+      if (remaining.length === 0) {
+        updateBlocksLeft();
+        return;
+      }
+
+      const randomIndex = Math.floor(Math.random() * remaining.length);
+      const tile = remaining[randomIndex];
+      tile.classList.add("removed");
+      updateBlocksLeft();
+    }
+
+    function normalize(str) {
+      return str.trim().toLowerCase();
+    }
+
+    function handleGuess() {
+      if (!roundActive) return;
+
+      const input = guessInput.value;
+      if (!input.trim()) {
+        feedbackEl.textContent = "Type something to guess!";
+        feedbackEl.className = "feedback err";
+        return;
+      }
+
+      const round = rounds[currentRoundIndex];
+      const correct = normalize(input) === normalize(round.answer);
+
+      if (correct) {
+        roundActive = false;
+        const player = players[currentPlayerIndex];
+        player.score += 1;
+
+        // reveal everything
+        coverTiles.forEach(tile => tile.classList.add("removed"));
+        updateBlocksLeft();
+
+        feedbackEl.textContent = `${player.name} is correct! The answer was "${round.answer}".`;
+        feedbackEl.className = "feedback ok";
+
+        roundStatusEl.textContent = `${player.name} wins this round!`;
+        updateScoresUI();
+        revealBtn.disabled = true;
+        guessBtn.disabled = true;
+
+        if (currentRoundIndex < rounds.length - 1) {
+          nextRoundBtn.disabled = false;
+          winnerLabelEl.textContent = "Click Next Round to continue.";
+        } else {
+          // game finished
+          const topScore = Math.max(...players.map(p => p.score));
+          const winners = players.filter(p => p.score === topScore);
+          if (winners.length === 1) {
+            winnerLabelEl.textContent = `🏆 Overall winner: ${winners[0].name} (${winners[0].score} pts)`;
+          } else {
+            const names = winners.map(w => w.name).join(", ");
+            winnerLabelEl.textContent = `🏆 Tie between: ${names} (${topScore} pts)`;
+          }
+          roundStatusEl.textContent = "Game over!";
+        }
+      } else {
+        feedbackEl.textContent = `Incorrect! ${players[currentPlayerIndex].name} loses their turn.`;
+        feedbackEl.className = "feedback err";
+        // next player's turn
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+        updateCurrentPlayerLabel();
+        updateScoresUI();
+      }
+
+      guessInput.value = "";
+      guessInput.focus();
+    }
+
+    function goToNextRound() {
+      if (currentRoundIndex < rounds.length - 1) {
+        currentRoundIndex++;
+        loadRound(currentRoundIndex);
+      }
+    }
+
+    /********************
+     * EVENT LISTENERS
+     ********************/
+    revealBtn.addEventListener("click", () => {
+      revealRandomTile();
+      guessInput.focus();
+    });
+
+    guessBtn.addEventListener("click", () => {
+      handleGuess();
+    });
+
+    guessInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        handleGuess();
+      }
+    });
+
+    nextRoundBtn.addEventListener("click", () => {
+      goToNextRound();
+    });
+
+    /********************
+     * START GAME
+     ********************/
+    window.addEventListener("load", () => {
+      loadRound(currentRoundIndex);
+    });
+  </script>
 </body>
 </html>
