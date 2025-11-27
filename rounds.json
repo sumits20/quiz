@@ -1,14 +1,41 @@
 [
-  {
-    "src": "images/cat.jpg",
-    "answer": "cat"
-  },
-  {
-    "src": "images/eiffel.jpg",
-    "answer": "eiffel tower"
-  },
-  {
-    "src": "images/dog.jpg",
-    "answer": "dog"
-  }
+  { "src": "images/bat.jpg", "answer": "bat" },
+  { "src": "images/bison.jpg", "answer": "bison" },
+  { "src": "images/black panther.jpg", "answer": "black panther" },
+  { "src": "images/butterfly.jpg", "answer": "butterfly" },
+  { "src": "images/cat.jpg", "answer": "cat" },
+  { "src": "images/cat2.jpg", "answer": "cat" },
+  { "src": "images/clown_fish.jpg", "answer": "clown fish" },
+  { "src": "images/cow.jpg", "answer": "cow" },
+  { "src": "images/crocodile.jpg", "answer": "crocodile" },
+  { "src": "images/crow.jpg", "answer": "crow" },
+  { "src": "images/deer.jpg", "answer": "deer" },
+  { "src": "images/dog.jpg", "answer": "dog" },
+  { "src": "images/dog2.jpg", "answer": "dog" },
+  { "src": "images/eiffel.jpg", "answer": "eiffel tower" },
+  { "src": "images/elephant.jpg", "answer": "elephant" },
+  { "src": "images/football.jpg", "answer": "football" },
+  { "src": "images/fox.jpg", "answer": "fox" },
+  { "src": "images/frog.jpg", "answer": "frog" },
+  { "src": "images/giraffe.jpg", "answer": "giraffe" },
+  { "src": "images/goat.jpg", "answer": "goat" },
+  { "src": "images/honey bee.jpg", "answer": "honey bee" },
+  { "src": "images/hornbill.jpg", "answer": "hornbill" },
+  { "src": "images/horse.jpg", "answer": "horse" },
+  { "src": "images/lama.jpg", "answer": "lama" },
+  { "src": "images/lion.jpg", "answer": "lion" },
+  { "src": "images/moon.jpg", "answer": "moon" },
+  { "src": "images/owl.jpg", "answer": "owl" },
+  { "src": "images/parrot.jpg", "answer": "parrot" },
+  { "src": "images/pig.jpg", "answer": "pig" },
+  { "src": "images/porcupine.jpg", "answer": "porcupine" },
+  { "src": "images/pyramid.jpg", "answer": "pyramid" },
+  { "src": "images/rabbit.jpg", "answer": "rabbit" },
+  { "src": "images/raccoon.jpg", "answer": "raccoon" },
+  { "src": "images/saturn.jpg", "answer": "saturn" },
+  { "src": "images/sheep.jpg", "answer": "sheep" },
+  { "src": "images/snail.jpg", "answer": "snail" },
+  { "src": "images/taj_mahal.jpg", "answer": "taj mahal" },
+  { "src": "images/turtle.jpg", "answer": "turtle" },
+  { "src": "images/zebra.jpg", "answer": "zebra" }
 ]
