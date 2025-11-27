@@ -45,6 +45,18 @@
   { "src": "images/grasshopper.jpg", "answer": "grasshopper | locust" },
   { "src": "images/ladybug.jpg", "answer": "ladybug | ladybird" },
   { "src": "images/caterpillar.jpg", "answer": "caterpillar" }
+    { "src": "images/gorilla.jpg", "answer": "gorilla" },
+  { "src": "images/moose.jpg", "answer": "moose | elk" },
+  { "src": "images/otter.jpg", "answer": "otter" },
+  { "src": "images/flamingo.jpg", "answer": "flamingo" },
+  { "src": "images/armadillo.jpg", "answer": "armadillo" },
+  { "src": "images/lemur.jpg", "answer": "lemur" },
+  { "src": "images/koala.png", "answer": "koala | bear" },
+  { "src": "images/hedgehog.jpg", "answer": "hedgehog" },
+  { "src": "images/sloth.jpg", "answer": "sloth" },
+  { "src": "images/chameleon.jpg", "answer": "chameleon | lizard" },
+  { "src": "images/rhino.jpg", "answer": "rhino | rhinoceros" }
 ]
+
 
 
