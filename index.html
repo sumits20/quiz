@@ -429,6 +429,7 @@
         <div class="panel-title">Scores</div>
         <div class="scores-grid" id="scoresGrid"></div>
         <div class="bottom-controls">
+          <button id="resetGameBtn" class="btn-secondary">Reset Game</button>
           <button id="nextRoundBtn" class="btn-secondary" disabled>Next Round</button>
           <span class="spacer"></span>
           <span id="winnerLabel"></span>
@@ -482,6 +483,7 @@
   const guessBtn = document.getElementById("guessBtn");
   const guessInput = document.getElementById("guessInput");
   const nextRoundBtn = document.getElementById("nextRoundBtn");
+  const resetGameBtn = document.getElementById("resetGameBtn");
 
   /********************
    * INITIAL SETUP
@@ -743,6 +745,29 @@
     }
   }
 
+  function resetGame() {
+    // Reset all player scores
+    players.forEach(p => p.score = 0);
+  
+    // Reset round index
+    currentRoundIndex = 0;
+  
+    // Reset state
+    roundActive = true;
+    finalGuessPhase = false;
+    finalGuessesLeft = 0;
+  
+    // Clear messages
+    feedbackEl.textContent = "";
+    feedbackEl.className = "feedback";
+    winnerLabelEl.textContent = "";
+    roundStatusEl.textContent = "Guess the hidden picture!";
+  
+    // Reload the first round
+    loadRound(currentRoundIndex);
+  }
+
+  
   /********************
    * LOAD ROUNDS.JSON
    ********************/
@@ -791,7 +816,11 @@
   nextRoundBtn.addEventListener("click", () => {
     goToNextRound();
   });
-
+  
+  resetGameBtn.addEventListener("click", () => {
+    resetGame();
+  });
+  
   /********************
    * START GAME
    ********************/
@@ -803,6 +832,7 @@
   
 </body>
 </html>
+
 
 
 
