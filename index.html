@@ -555,7 +555,7 @@
       nameSpan.textContent = player.name;
       const tagSpan = document.createElement("span");
       tagSpan.className = "player-tag";
-      tagSpan.textContent = player.score === highestScore && highestScore > 0 ? "Leader" : "Challenger";
+      tagSpan.textContent = player.score === highestScore && highestScore > 0 ? " * " : "";
 
       nameRow.appendChild(nameSpan);
       nameRow.appendChild(tagSpan);
@@ -832,6 +832,7 @@
   
 </body>
 </html>
+
 
 
 
