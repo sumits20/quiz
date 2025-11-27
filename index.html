@@ -651,6 +651,10 @@
       } else {
         feedbackEl.textContent = `Incorrect! ${players[currentPlayerIndex].name} loses their turn.`;
         feedbackEl.className = "feedback err";
+
+        // Reveal 1 block on wrong answer
+        revealRandomTile();
+        
         // next player's turn
         currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
         updateCurrentPlayerLabel();
@@ -699,5 +703,6 @@
   </script>
 </body>
 </html>
+
 
 
