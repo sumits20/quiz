@@ -16,7 +16,7 @@
   { "src": "images/elephant.jpg", "answer": "elephant" },
   { "src": "images/football.jpg", "answer": "football" },
   { "src": "images/fox.jpg", "answer": "fox" },
-  { "src": "images/frog.jpg", "answer": "frog" },
+  { "src": "images/frog.jpg", "answer": "frog | toad" },
   { "src": "images/giraffe.jpg", "answer": "giraffe" },
   { "src": "images/goat.jpg", "answer": "goat" },
   { "src": "images/honey bee.jpg", "answer": "honey bee" },
@@ -39,3 +39,4 @@
   { "src": "images/turtle.jpg", "answer": "turtle" },
   { "src": "images/zebra.jpg", "answer": "zebra" }
 ]
+
