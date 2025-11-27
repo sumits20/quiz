@@ -38,5 +38,13 @@
   { "src": "images/taj_mahal.jpg", "answer": "taj mahal" },
   { "src": "images/turtle.jpg", "answer": "turtle" },
   { "src": "images/zebra.jpg", "answer": "zebra" }
+  { "src": "images/penguin.jpg", "answer": "penguin" },
+  { "src": "images/dolphin.jpg", "answer": "dolphin" },
+  { "src": "images/whale.jpg", "answer": "whale" },
+  { "src": "images/crab.jpg", "answer": "crab" },
+  { "src": "images/grasshopper.jpg", "answer": "grasshopper | locust" },
+  { "src": "images/ladybug.jpg", "answer": "ladybug | ladybird" },
+  { "src": "images/caterpillar.jpg", "answer": "caterpillar" }
 ]
+
 
