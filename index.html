@@ -510,7 +510,26 @@
       }
       updateBlocksLeft();
     }
-
+    function checkAllTilesRevealed() {
+      const remaining = coverTiles.filter(t => !t.classList.contains("removed")).length;
+    
+      if (remaining === 0 && roundActive) {
+        // Nobody guessed correctly
+        roundActive = false;
+    
+        feedbackEl.textContent = "All blocks revealed! No one guessed correctly.";
+        feedbackEl.className = "feedback err";
+    
+        roundStatusEl.textContent = "Round over — no points awarded.";
+    
+        revealBtn.disabled = true;
+        guessBtn.disabled = true;
+        nextRoundBtn.disabled = false;
+    
+        return true;
+      }
+      return false;
+    }
     function updateBlocksLeft() {
       const remaining = coverTiles.filter(t => !t.classList.contains("removed")).length;
       blocksLeftEl.textContent = remaining;
@@ -590,6 +609,7 @@
       const remaining = coverTiles.filter(t => !t.classList.contains("removed"));
       if (remaining.length === 0) {
         updateBlocksLeft();
+        checkAllTilesRevealed();
         return;
       }
 
@@ -597,6 +617,8 @@
       const tile = remaining[randomIndex];
       tile.classList.add("removed");
       updateBlocksLeft();
+      // After revealing a tile, check if round should end
+      checkAllTilesRevealed();
     }
 
     function normalize(str) {
@@ -703,6 +725,7 @@
   </script>
 </body>
 </html>
+
 
 
 
